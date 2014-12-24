@@ -4,8 +4,8 @@ from enum import Enum
 
 pygame.init()
 
-width = 800
-height = 600
+width = 640
+height = 480
 ticks_per_second = 60
 
 black = (0, 0, 0)
@@ -17,6 +17,7 @@ brick_image = pygame.image.load('brick.png')
 brick_image_size = brick_image.get_rect().size
 
 bricks = []
+balls = []
 
 class PowerdropEnum(Enum):
     Nothing = 0
@@ -65,6 +66,21 @@ class PowerDrop:
 
         self.y += 2
 
+class Ball:
+    def __init__(self, (x, y), (dx, dy)):
+        self.image = pygame.image.load('ball.png')
+        self.id = len(balls) + 1
+        self.x = x
+        self.y = y
+        self.dx = dx
+        self.dy = dy
+        self.size = self.image.get_rect().size
+
+    def bounds(self):
+        x = self.x
+        y = self.y
+        return (x, x + self.width, y, y + self.height)
+
 class Brick:
     def __init__(self, powerdrop, (x, y)):
         self.image = pygame.image.load('brick.png')
@@ -72,14 +88,14 @@ class Brick:
         self.id = len(bricks) + 1
         self.x = x
         self.y = y
-        self.width = self.image.get_rect().size[0]
-        self.height = self.image.get_rect().size[1]
+        self.size = self.image.get_rect().size
         self.haspower = powerdrop != PowerdropEnum.Nothing
 
     def bounds(self):
         x = self.x
         y = self.y
-        return (x, x + self.width, y, y + self.height)
+        s = self.size
+        return (x, x + s[0], y, y + s[1])
 
     def destroy(self):
         print "Destroying brick %s." %(self.id)
