@@ -81,6 +81,21 @@ class Ball:
         y = self.y
         return (x, x + self.width, y, y + self.height)
 
+    def destroy(self):
+        print "Destroying ball %s." %(self.id)
+        balls.remove(self)
+        # lives -= 1
+
+        # if lives <= 0:
+        #     quit_game()
+
+    def tick(self):
+        self.x += self.dx
+        self.y += self.dy
+
+        if self.y > height:
+            self.destroy()
+
 class Brick:
     def __init__(self, powerdrop, (x, y)):
         self.image = pygame.image.load('brick.png')
@@ -139,6 +154,10 @@ def tick():
             draw_image(p.image, (p.x, p.y))
             p.tick()
 
+        for b in balls:
+            draw_image(b.image, (b.x, b.y))
+            b.tick()
+
         pygame.display.update()
         clock.tick(ticks_per_second)
 
@@ -154,8 +173,15 @@ def init():
             b = Brick(power, (col * brick_image_size[0], row * brick_image_size[1]))
             bricks.append(b)
 
+    ball = Ball((width / 2, height / 2), (0, 2))
+    balls.append(ball)
+
 pdm = PowerDropManager(2, 2)
 init()
 tick()
-pygame.quit()
-quit()
+
+def quit_game():
+    pygame.quit()
+    quit()
+
+quit_game()
