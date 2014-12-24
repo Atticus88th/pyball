@@ -17,7 +17,6 @@ brick_image = pygame.image.load('brick.png')
 brick_image_size = brick_image.get_rect().size
 
 bricks = []
-powerdrops = []
 
 class PowerdropEnum(Enum):
     Nothing = 0
@@ -29,17 +28,36 @@ class MouseButton(Enum):
     Scroll = 2
     Right = 3
 
+class PowerDropManager:
+    def __init__(self, max_powerdrops, creation_delay_seconds):
+        self.max_powerdrops = max_powerdrops
+        self.powerdrops = []
+
+    def try_create_powerdrop(self, powerdrop_type, (x, y)):
+        if len(self.powerdrops) >= self.max_powerdrops:
+            print "Too many powerdrops exist."
+            return
+
+        power = PowerDrop(powerdrop_type, (x, y))
+        self.add_powerdrop(power)
+
+    def add_powerdrop(self, powerdrop):
+        self.powerdrops.append(powerdrop)
+
+    def remove_powerdrop(self, powerdrop):
+        self.powerdrops.remove(powerdrop)
+
 class PowerDrop:
     def __init__(self, powerdrop, (x, y)):
         self.droptype = powerdrop
         self.image = pygame.image.load('powerdrop_%s.png' %(powerdrop.name.lower()))
-        self.id = len(powerdrops) + 1
+        self.id = len(pdm.powerdrops) + 1
         self.x = x
         self.y = y
 
     def destroy(self):
         print "Destroying powerdrop %s; %s." %(self.id, self.droptype.name)
-        powerdrops.remove(self)
+        pdm.remove_powerdrop(self)
 
     def tick(self):
         if self.y > height:
@@ -66,7 +84,7 @@ class Brick:
     def destroy(self):
         print "Destroying brick %s." %(self.id)
         if self.haspower:
-            create_powerdrop(self.powerdrop, (self.x, self.y))
+            pdm.try_create_powerdrop(self.powerdrop, (self.x, self.y))
 
         bricks.remove(self)
 
@@ -78,10 +96,6 @@ def brick_at_pos(x, y):
                 return b
 
     return None
-
-def create_powerdrop(powerdrop, (x, y)):
-    power = PowerDrop(powerdrop, (x, y))
-    powerdrops.append(power)
 
 def tick():
     while True:
@@ -105,7 +119,7 @@ def tick():
         for b in bricks:
             draw_image(b.image, (b.x, b.y))
 
-        for p in powerdrops:
+        for p in pdm.powerdrops:
             draw_image(p.image, (p.x, p.y))
             p.tick()
 
@@ -124,6 +138,7 @@ def init():
             b = Brick(power, (col * brick_image_size[0], row * brick_image_size[1]))
             bricks.append(b)
 
+pdm = PowerDropManager(2, 2)
 init()
 tick()
 pygame.quit()
