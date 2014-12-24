@@ -18,6 +18,7 @@ brick_image_size = brick_image.get_rect().size
 
 bricks = []
 balls = []
+paddles = []
 
 class PowerdropEnum(Enum):
     Nothing = 0
@@ -96,6 +97,13 @@ class Ball:
         if self.y > height:
             self.destroy()
 
+class Paddle:
+    def __init__(self, (x, y)):
+        self.image = pygame.image.load('paddle.png')
+        self.x = x
+        self.y = y
+        self.size = self.image.get_rect().size
+
 class Brick:
     def __init__(self, powerdrop, (x, y)):
         self.image = pygame.image.load('brick.png')
@@ -145,6 +153,11 @@ def tick():
                     if clicked is not None:
                         clicked.destroy()
 
+            if etype == pygame.MOUSEMOTION:
+                mx, my = e.pos
+                p = paddles[0]
+                p.x = mx - (p.size[0] / 2)
+
         display.fill(black)
 
         for b in bricks:
@@ -157,6 +170,9 @@ def tick():
         for b in balls:
             draw_image(b.image, (b.x, b.y))
             b.tick()
+
+        for p in paddles:
+            draw_image(p.image, (p.x, p.y))
 
         pygame.display.update()
         clock.tick(ticks_per_second)
@@ -175,6 +191,14 @@ def init():
 
     ball = Ball((width / 2, height / 2), (0, 2))
     balls.append(ball)
+
+    paddle = Paddle((width / 2, height - 32))
+    paddle.x -= paddle.size[0] / 2
+    paddles.append(paddle)
+
+    # TODO: When collision is written so we don't have to
+    #       destroy bricks manually
+    # pygame.mouse.set_visible(False)
 
 pdm = PowerDropManager(2, 2)
 init()
