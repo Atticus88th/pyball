@@ -91,11 +91,11 @@ class Ball:
         #     quit_game()
 
     def tick(self):
-        self.x += self.dx
-        self.y += self.dy
-
         if self.y > height:
             self.destroy()
+
+        self.x += self.dx
+        self.y += self.dy
 
 class Paddle:
     def __init__(self, (x, y)):
@@ -114,12 +114,6 @@ class Brick:
         self.size = self.image.get_rect().size
         self.haspower = powerdrop != PowerdropEnum.Nothing
 
-    def bounds(self):
-        x = self.x
-        y = self.y
-        s = self.size
-        return (x, x + s[0], y, y + s[1])
-
     def destroy(self):
         print "Destroying brick %s." %(self.id)
         if self.haspower:
@@ -129,12 +123,18 @@ class Brick:
 
 def brick_at_pos(x, y):
     for b in bricks:
-        x1, x2, y1, y2 = b.bounds()
+        x1, x2, y1, y2 = bounds_of(b)
         if x1 < x <= x2:
             if y1 < y <= y2:
                 return b
 
     return None
+
+def bounds_of(obj):
+    x = obj.x
+    y = obj.y
+    s = obj.size
+    return (x, x + s[0], y, y + s[1])
 
 def tick():
     while True:
