@@ -6,6 +6,7 @@ pygame.init()
 
 width = 800
 height = 600
+ticks_per_second = 60
 
 black = (0, 0, 0)
 display = pygame.display.set_mode((width, height))
@@ -65,8 +66,7 @@ class Brick:
     def destroy(self):
         print "Destroying brick %s." %(self.id)
         if self.haspower:
-            power = PowerDrop(self.powerdrop, (self.x, self.y + 20))
-            powerdrops.append(power)
+            create_powerdrop(self.powerdrop, (self.x, self.y))
 
         bricks.remove(self)
 
@@ -78,6 +78,10 @@ def brick_at_pos(x, y):
                 return b
 
     return None
+
+def create_powerdrop(powerdrop, (x, y)):
+    power = PowerDrop(powerdrop, (x, y))
+    powerdrops.append(power)
 
 def tick():
     while True:
@@ -106,7 +110,7 @@ def tick():
             p.tick()
 
         pygame.display.update()
-        clock.tick(60)
+        clock.tick(ticks_per_second)
 
 def draw_image(image, (x, y)):
     display.blit(image, (x, y))
@@ -119,11 +123,6 @@ def init():
             power = random.choice(list(PowerdropEnum))
             b = Brick(power, (col * brick_image_size[0], row * brick_image_size[1]))
             bricks.append(b)
-
-    # Visual test
-    # for b in bricks:
-    # 	if not b.haspower:
-    # 		bricks.remove(b)
 
 init()
 tick()
