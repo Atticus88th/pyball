@@ -85,10 +85,11 @@ class Ball:
     def destroy(self):
         print "Destroying ball %s." %(self.id)
         balls.remove(self)
-        # lives -= 1
 
-        # if lives <= 0:
-        #     quit_game()
+    def on_collide(self, other):
+        self.dx = -self.dx
+        self.dy = -self.dy
+        print self.dx, self.dy
 
     def tick(self):
         if self.y > height:
@@ -96,6 +97,14 @@ class Ball:
 
         self.x += self.dx
         self.y += self.dy
+
+        for b in bricks:
+            if is_collision(self, b):
+                self.on_collide(b)
+
+        for p in paddles:
+            if is_collision(self, p):
+                self.on_collide(p)
 
 class Paddle:
     def __init__(self, (x, y)):
@@ -123,7 +132,7 @@ class Brick:
 
 def brick_at_pos(x, y):
     for b in bricks:
-        x1, x2, y1, y2 = bounds_of(b)
+        x1, y1, x2, y2 = bounds_of(b)
         if x1 < x <= x2:
             if y1 < y <= y2:
                 return b
@@ -134,7 +143,22 @@ def bounds_of(obj):
     x = obj.x
     y = obj.y
     s = obj.size
-    return (x, x + s[0], y, y + s[1])
+    return (x, y, x + s[0], y + s[1])
+
+def is_collision(tester, other):
+    if tester == other:
+        return False
+
+    ax, ay, aX, aY = bounds_of(tester)
+    bx, by, bX, bY = bounds_of(other)
+
+    if (aX <= bx or
+        bX <= ax or
+        aY <= by or
+        bY <= ay):
+        return False
+
+    return True
 
 def tick():
     while True:
@@ -189,7 +213,7 @@ def run():
             b = Brick(power, (col * brick_image_size[0], row * brick_image_size[1]))
             bricks.append(b)
 
-    ball = Ball((width / 2, height / 2), (0, 2))
+    ball = Ball((width / 2, height / 2), (1, 2))
     balls.append(ball)
 
     paddle = Paddle((width / 2, height - 32))
