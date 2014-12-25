@@ -180,7 +180,7 @@ def tick():
 def draw_image(image, (x, y)):
     display.blit(image, (x, y))
 
-def init():
+def run():
     bricks_per_row = width / brick_image_size[0]
 
     for row in range(5):
@@ -200,9 +200,10 @@ def init():
     #       destroy bricks manually
     # pygame.mouse.set_visible(False)
 
+    tick()
+
 pdm = PowerDropManager(2, 2)
-init()
-tick()
+run()
 
 def quit_game():
     pygame.quit()
