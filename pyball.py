@@ -1,6 +1,7 @@
 import pygame
 import random
 from enum import Enum
+from vector import Vector
 
 pygame.init()
 
@@ -68,13 +69,12 @@ class PowerDrop:
         self.y += 2
 
 class Ball:
-    def __init__(self, (x, y), (dx, dy)):
+    def __init__(self, (x, y)):
         self.image = pygame.image.load('ball.png')
         self.id = len(balls) + 1
         self.x = x
         self.y = y
-        self.dx = dx
-        self.dy = dy
+        self.vector = Vector((0, 0))
         self.size = self.image.get_rect().size
 
     def bounds(self):
@@ -87,16 +87,46 @@ class Ball:
         balls.remove(self)
 
     def on_collide(self, other):
-        self.dx = -self.dx
-        self.dy = -self.dy
-        print self.dx, self.dy
+        vec = self.vector
+
+        left = vec.x > 0
+        right = vec.x < 0
+        above = vec.y > 0
+        below = vec.y < 0
+
+        # TODO: Useful?
+        la = left and above
+        ra = right and above
+        lb = left and below
+        rb = right and below
+
+        print "l %s, r %s, a %s, b %s" %(left, right, above, below)
+
+        from random import randint
+        rand = randint(-2, 2)
+
+        # TODO: Verify
+        if left or right and (not above and not below):
+            self.vector.x = -vec.x
+            print "Set -vec.x\n"
+        elif above or below and (not left and not right):
+            self.vector.y = -vec.y
+            print "Set -vec.y\n"
+        elif (left and above) or (right and below):
+            self.vector.x = -vec.x
+            self.vector.y = vec.y + rand
+            print "Set -vec.x, vec.y + rand\n"
+        else:
+            self.vector = -vec
+            print "Set -vec\n"
 
     def tick(self):
         if self.y > height:
             self.destroy()
 
-        self.x += self.dx
-        self.y += self.dy
+        vec = self.vector
+        self.x += vec.x
+        self.y += vec.y
 
         for b in bricks:
             if is_collision(self, b):
@@ -145,6 +175,9 @@ def bounds_of(obj):
     s = obj.size
     return (x, y, x + s[0], y + s[1])
 
+# TODO: Fix this triggering 3 collisions
+# IDEA: n ticks must pass before registering
+#       another collision with `other`
 def is_collision(tester, other):
     if tester == other:
         return False
@@ -158,6 +191,7 @@ def is_collision(tester, other):
         bY <= ay):
         return False
 
+    print "Collision found for: %s and %s" %(tester.__class__.__name__, other.__class__.__name__)
     return True
 
 def tick():
@@ -213,7 +247,8 @@ def run():
             b = Brick(power, (col * brick_image_size[0], row * brick_image_size[1]))
             bricks.append(b)
 
-    ball = Ball((width / 2, height / 2), (1, 2))
+    ball = Ball((width / 2, height / 2))
+    ball.vector = Vector((1, 2))
     balls.append(ball)
 
     paddle = Paddle((width / 2, height - 32))
